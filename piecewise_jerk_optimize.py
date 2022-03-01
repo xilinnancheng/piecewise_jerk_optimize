@@ -18,6 +18,8 @@ class PieceJerkOptimize:
         self.step = []
         self.step_square = []
         self.ref_x = []
+        self.init_state = []
+        self.end_state = []
         self.x_upper_bound = []
         self.x_lower_bound = []
         self.dx_upper_bound = []
@@ -61,6 +63,12 @@ class PieceJerkOptimize:
     def SetDDDXBound(self, upper_bound, lower_bound):
         self.dddx_lower_bound = lower_bound
         self.dddx_upper_bound = upper_bound
+
+    def SetInitState(self, init_state):
+        self.init_state = init_state
+
+    def SetEndState(self, end_state):
+        self.end_state = end_state
 
     def CalculateQ(self):
         row = []
@@ -121,52 +129,62 @@ class PieceJerkOptimize:
         col.append(self.num_of_point - 1)
         data.append(1)
 
+        # start dx limit
+        row.append(4 * self.num_of_point + 1)
+        col.append(self.num_of_point)
+        data.append(1)
+
+        # start ddx limit
+        row.append(4 * self.num_of_point + 2)
+        col.append(2 * self.num_of_point)
+        data.append(1)
+
         # ddx consistency
         for i in range(self.num_of_point - 1):
-            row.append(4 * self.num_of_point + 1 + i)
+            row.append(4 * self.num_of_point + 3 + i)
             col.append(self.num_of_point + i)
             data.append(1)
 
-            row.append(4 * self.num_of_point + 1 + i)
+            row.append(4 * self.num_of_point + 3 + i)
             col.append(self.num_of_point + i + 1)
             data.append(-1)
 
-            row.append(4 * self.num_of_point + 1 + i)
+            row.append(4 * self.num_of_point + 3 + i)
             col.append(2 * self.num_of_point + i)
             data.append(0.5 * self.step[i])
 
-            row.append(4 * self.num_of_point + 1 + i)
+            row.append(4 * self.num_of_point + 3 + i)
             col.append(2 * self.num_of_point + i + 1)
             data.append(0.5 * self.step[i])
 
         # dx consistency
         for i in range(self.num_of_point - 1):
-            row.append(5 * self.num_of_point + i)
+            row.append(5 * self.num_of_point + 2 + i)
             col.append(i)
             data.append(1)
 
-            row.append(5 * self.num_of_point + i)
+            row.append(5 * self.num_of_point + 2 + i)
             col.append(i + 1)
             data.append(-1)
 
-            row.append(5 * self.num_of_point + i)
+            row.append(5 * self.num_of_point + 2 + i)
             col.append(self.num_of_point + i)
             data.append(self.step[i])
 
-            row.append(5 * self.num_of_point + i)
+            row.append(5 * self.num_of_point + 2 + i)
             col.append(self.num_of_point + i + 1)
             data.append(self.step[i])
 
-            row.append(5 * self.num_of_point + i)
+            row.append(5 * self.num_of_point + 2 + i)
             col.append(2 * self.num_of_point + i)
             data.append(1.0/3.0 * self.step_square[i])
 
-            row.append(5 * self.num_of_point + i)
+            row.append(5 * self.num_of_point + 2 + i)
             col.append(2 * self.num_of_point + i + 1)
             data.append(1.0/6.0 * self.step_square[i])
 
         A = sparse.csc_matrix((data, (row, col)), shape=(
-            6 * self.num_of_point - 1, self.num_of_variable))
+            6 * self.num_of_point + 1, self.num_of_variable))
 
         lb = []
         ub = []
@@ -191,6 +209,20 @@ class PieceJerkOptimize:
             lb.append(self.dddx_lower_bound[i])
             ub.append(self.dddx_upper_bound[i])
 
+        # start/end x
+        lb.append(self.init_state[0] - 1e-2)
+        ub.append(self.init_state[0] + 1e-2)
+        lb.append(self.end_state[0] - 1e-2)
+        ub.append(self.end_state[0] + 1e-2)
+
+        # start dx
+        lb.append(self.init_state[1] - 1e-2)
+        ub.append(self.init_state[1] + 1e-2)
+
+        # start ddx
+        lb.append(self.init_state[2] - 1e-2)
+        ub.append(self.init_state[2] + 1e-2)
+
         ## dx consistency
         for i in range(self.num_of_point - 1):
             lb.append(-10e-5)
@@ -201,12 +233,10 @@ class PieceJerkOptimize:
             lb.append(-10e-5)
             ub.append(10e-5)
 
-        # start/end x
-        lb.append(self.ref_x[0] - 1e-5)
-        ub.append(self.ref_x[0] + 1e-5)
-        lb.append(self.ref_x[self.num_of_point-1] - 1e-5)
-        ub.append(self.ref_x[self.num_of_point-1] + 1e-5)
-
+        numpy.set_printoptions(linewidth=numpy.inf)
+        print(A.toarray())
+        print(lb)
+        print(ub)
         return A,lb,ub    
 
     def Optimize(self):

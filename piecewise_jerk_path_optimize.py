@@ -134,6 +134,9 @@ if __name__ == "__main__":
     ref_path_s_step = [ref_path_s[i+1] - ref_path_s[i] for i in range(ref_path_size - 1)]
     ref_path_l = [0.5 * (ref_path_boundary_lower_l[i] + ref_path_boundary_upper_l[i]) for i in range(ref_path_size)]
     
+    init_state = [ref_path_l[0],0.3,0.1]
+    end_state = [ref_path_l[-1],0.0,0.0]
+
     # bound
     l_lower_bound = ref_path_boundary_lower_l
     l_upper_bound = ref_path_boundary_upper_l
@@ -157,6 +160,8 @@ if __name__ == "__main__":
     path_optimize.SetWeight(w_l, w_dl, w_ddl, w_dddl, w_ref_l)
     path_optimize.SetReferencePathS(ref_path_s)
     path_optimize.SetReferenceX(ref_path_l)
+    path_optimize.SetInitState(init_state)
+    path_optimize.SetEndState(end_state)
     path_optimize.SetStep(ref_path_s_step)
     path_optimize.SetXBound(l_upper_bound, l_lower_bound)
     path_optimize.SetDXBound(dl_upper_bound, dl_lower_bound)
