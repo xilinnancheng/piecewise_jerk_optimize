@@ -1,5 +1,5 @@
 # piecewise_jerk_optimize
-Piecewise jerk path optimize  
+Piecewise jerk speed optimize  
 <img src=https://github.com/xilinnancheng/piecewise_jerk_optimize/blob/main/piecewise_jerk_speed.png width = "600" height="400"/><br/>  
 
 Piecewise jerk path optimize  
