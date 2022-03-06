@@ -206,8 +206,8 @@ class PieceJerkOptimize:
         
         # dddx bound
         for i in range(self.num_of_point - 1):
-            lb.append(self.dddx_lower_bound[i])
-            ub.append(self.dddx_upper_bound[i])
+            lb.append(self.dddx_lower_bound[i] * self.step[i])
+            ub.append(self.dddx_upper_bound[i] * self.step[i])
 
         # start/end x
         lb.append(self.init_state[0] - 1e-2)
@@ -234,9 +234,6 @@ class PieceJerkOptimize:
             ub.append(10e-5)
 
         numpy.set_printoptions(linewidth=numpy.inf)
-        print(A.toarray())
-        print(lb)
-        print(ub)
         return A,lb,ub    
 
     def Optimize(self):
@@ -256,6 +253,10 @@ class PieceJerkOptimize:
         self.solution_x = res.x[0:self.num_of_point]
         self.solution_dx = res.x[self.num_of_point:2 *self.num_of_point]
         self.solution_ddx = res.x[2 *self.num_of_point:3 * self.num_of_point]
+        
+        for i in range(self.num_of_point - 1):
+            self.solution_dddx.append((self.solution_ddx[i+1] - self.solution_ddx[i])/self.step[i])
+        self.solution_dddx.append(0.0)
 
     def VizResult(self):
         pass

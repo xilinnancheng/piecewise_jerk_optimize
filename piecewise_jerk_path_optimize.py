@@ -9,6 +9,9 @@ class PieceJerkPathOptimize(PieceJerkOptimize):
     def __init__(self, num_of_point):
         super().__init__(num_of_point)
         self.ref_path_s = []
+        self.solution_theta = []
+        self.solution_kappa = []
+        self.solution_dkappa = []
         
     def SetReferencePathS(self, ref_path_s):
         self.ref_path_s = ref_path_s
@@ -62,31 +65,75 @@ class PieceJerkPathOptimize(PieceJerkOptimize):
         
         return Q
 
-    def VizResult(self):        
-        plt.subplot(3, 1, 1)
+    def VizResult(self):
+        plt.figure(1)
+        plt.subplot(4, 1, 1)
         plt.plot(self.ref_path_s, self.x_upper_bound,'r',marker="x")
         plt.plot(self.ref_path_s, self.x_lower_bound,'r',marker="x")
         plt.plot(self.ref_path_s, self.ref_x,'g',marker="x")
         plt.plot(self.ref_path_s, self.solution_x,'b')
         plt.grid()
         plt.legend(["upper_bound","lower_bound","ref_path_l","solution_l"])
-        plt.title("PieceWise Jerk Path optimization")
+        plt.title("PieceWise Jerk Path Optimization Solution")
 
-        plt.subplot(3, 1, 2)
+        plt.subplot(4, 1, 2)
         plt.plot(self.ref_path_s, self.solution_dx,'b')
         plt.plot(self.ref_path_s, self.dx_upper_bound,'r')
         plt.plot(self.ref_path_s, self.dx_lower_bound,'r')
         plt.grid()
         plt.legend(["solution_dl","dl_bound"])
 
-        plt.subplot(3, 1, 3)
+        plt.subplot(4, 1, 3)
         plt.plot(self.ref_path_s, self.solution_ddx,'b')
         plt.plot(self.ref_path_s, self.ddx_upper_bound,'r')
         plt.plot(self.ref_path_s, self.ddx_lower_bound,'r')
         plt.legend(["solution_ddl","ddl_bound"])
         plt.grid()
-        plt.show()
+
+        plt.subplot(4, 1, 4)
+        plt.plot(self.ref_path_s, self.solution_dddx,'b')
+        plt.plot(self.ref_path_s, self.dddx_upper_bound,'r')
+        plt.plot(self.ref_path_s, self.dddx_lower_bound,'r')
+        plt.legend(["solution_dddl","dddl_bound"])
+        plt.grid()
+ 
+        plt.figure(2)
+        for index in range(self.num_of_point):
+            self.solution_theta.append(math.atan(self.solution_dx[index]/(1 - self.solution_x[index] * 0.0)) + 0.0)
+
+            delta_theta = self.solution_theta[index] - 0.0
+            cos_delta_theta = math.cos(delta_theta)
+            cos_delta_theta_square = pow(cos_delta_theta, 2)
+            cos_delta_theta_cubic = pow(cos_delta_theta, 3)
+            sin_delta_theta = math.sin(delta_theta)
+
+            self.solution_kappa.append(((self.solution_ddx[index] + (0.0 * self.solution_x[index] + 0.0 * self.solution_dx[index])*math.tan(delta_theta)) * cos_delta_theta_square / (1-0.0 * self.solution_x[index]) + 0.0) * cos_delta_theta/(1 - 0.0 * self.solution_x[index]))
+            
+            delta_kappa = self.solution_kappa[index] - 0.0
+            self.solution_dkappa.append((self.solution_dddx[index] + \
+                                         (0.0 * self.solution_x[index] + 2 * 0.0 * self.solution_dx[index] + 0.0 * self.solution_ddx[index]) * math.tan(delta_theta) + \
+                                         (0.0 * self.solution_x[index] + 0.0 * self.solution_dx[index] * (delta_kappa)/cos_delta_theta_square) -\
+                                         (-(0.0 * self.solution_x[index] + 0.0 * self.solution_dx[index])/cos_delta_theta_square + 2 * (1 - 0.0 * self.solution_x) * sin_delta_theta*delta_kappa/cos_delta_theta_cubic) * ((1-0.0 * self.solution_x[index]/cos_delta_theta) * self.solution_kappa[index] - 0.0) -\
+                                         ((1 - 0.0 * self.solution_x[index]) / cos_delta_theta_square * ((sin_delta_theta * delta_kappa * (1 - 0.0 * self.solution_x)/cos_delta_theta_square - (0.0 * self.solution_x[index] + 0.0 * self.solution_dx[index])/cos_delta_theta) * self.solution_kappa[index] - 0.0))/ \
+                                         (math.pow((1 - 0.0 * self.solution_x[index]),2)/cos_delta_theta_cubic)))
         
+        plt.subplot(3, 1, 1)
+        plt.plot(self.ref_path_s, self.solution_theta,'b')
+        plt.grid()
+        plt.legend(["solution_theta"])
+        plt.title("PieceWise Jerk Path Optimization Solution")
+
+        plt.subplot(3, 1, 2)
+        plt.plot(self.ref_path_s, self.solution_kappa,'b')
+        plt.legend(["solution_kappa"])
+        plt.grid()
+
+        plt.subplot(3, 1, 3)
+        plt.plot(self.ref_path_s, self.solution_dkappa,'b')
+        plt.legend(["solution_dkappa"])
+        plt.grid()
+        plt.show()
+
 if __name__ == "__main__":
     # weight parameter
     w_l = 5
@@ -117,18 +164,18 @@ if __name__ == "__main__":
 
     ref_path_boundary_upper_l[1] = 3.0
     ref_path_boundary_lower_l[1] = -1.0
-    ref_path_boundary_upper_l[5] = 5.0
-    ref_path_boundary_lower_l[5] = 1.0
-    ref_path_boundary_upper_l[6] = 5.0
-    ref_path_boundary_lower_l[6] = 1.0
-    ref_path_boundary_upper_l[7] = 5.0
-    ref_path_boundary_lower_l[7] = 1.0
-    ref_path_boundary_upper_l[8] = 5.0
-    ref_path_boundary_lower_l[8] = 1.0
-    ref_path_boundary_upper_l[14] = 0.0
-    ref_path_boundary_lower_l[14] = -4.0
-    ref_path_boundary_upper_l[15] = 0.0
-    ref_path_boundary_lower_l[15] = -4.0
+    ref_path_boundary_upper_l[5] = 3.0
+    ref_path_boundary_lower_l[5] = 0.0
+    ref_path_boundary_upper_l[6] = 3.0
+    ref_path_boundary_lower_l[6] = 0.0
+    ref_path_boundary_upper_l[7] = 3.0
+    ref_path_boundary_lower_l[7] = 0.0
+    ref_path_boundary_upper_l[8] = 3.0
+    ref_path_boundary_lower_l[8] = 0.0
+    ref_path_boundary_upper_l[14] = 2.0
+    ref_path_boundary_lower_l[14] = -1.0
+    ref_path_boundary_upper_l[15] = 2.0
+    ref_path_boundary_lower_l[15] = -1.0
 
     ref_path_size = len(ref_path_s)
     ref_path_s_step = [ref_path_s[i+1] - ref_path_s[i] for i in range(ref_path_size - 1)]

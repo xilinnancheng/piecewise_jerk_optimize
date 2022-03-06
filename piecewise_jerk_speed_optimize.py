@@ -63,7 +63,7 @@ class PieceJerkSpeedOptimize(PieceJerkOptimize):
         return Q
 
     def VizResult(self):        
-        plt.subplot(3, 1, 1)
+        plt.subplot(4, 1, 1)
         plt.plot(self.ref_path_t, self.x_upper_bound,'r',marker="x")
         plt.plot(self.ref_path_t, self.x_lower_bound,'r',marker="x")
         plt.plot(self.ref_path_t, self.ref_x,'g',marker="x")
@@ -72,18 +72,25 @@ class PieceJerkSpeedOptimize(PieceJerkOptimize):
         plt.legend(["upper_bound","lower_bound","ref_path_s","solution_s"])
         plt.title("PieceWise Jerk Path optimization")
 
-        plt.subplot(3, 1, 2)
+        plt.subplot(4, 1, 2)
         plt.plot(self.ref_path_t, self.solution_dx,'b')
         plt.plot(self.ref_path_t, self.dx_upper_bound,'r')
         plt.plot(self.ref_path_t, self.dx_lower_bound,'r')
         plt.grid()
         plt.legend(["solution_ds","ds_bound"])
 
-        plt.subplot(3, 1, 3)
+        plt.subplot(4, 1, 3)
         plt.plot(self.ref_path_t, self.solution_ddx,'b')
         plt.plot(self.ref_path_t, self.ddx_upper_bound,'r')
         plt.plot(self.ref_path_t, self.ddx_lower_bound,'r')
         plt.legend(["solution_dds","dds_bound"])
+        plt.grid()
+
+        plt.subplot(4, 1, 4)
+        plt.plot(self.ref_path_t, self.solution_dddx,'b')
+        plt.plot(self.ref_path_t, self.dddx_upper_bound,'r')
+        plt.plot(self.ref_path_t, self.dddx_lower_bound,'r')
+        plt.legend(["solution_ddds","ddds_bound"])
         plt.grid()
         plt.show()
         
