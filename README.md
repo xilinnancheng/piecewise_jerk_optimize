@@ -9,3 +9,4 @@ Piecewise jerk path optimize
 # reference: 
 1. Optimal Vehicle Path Planning Using Quadratic Optimization for Baidu Apollo Open Platform https://arxiv.org/pdf/2112.02132.pdf
 2. https://www.cnblogs.com/icathianrain/p/14407626.html
+3. https://blog.csdn.net/u013468614/article/details/108748016
